@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Investment Operations Dashboard</title>
+<style>
+:root{--bg:#F3F8FD;--surface:#FFFFFF;--ink:#12263A;--muted:#4C6278;--line:#D5E3F0;--accent:#2B6CB0;--on:#FFFFFF;--tint:#E6F0FA;box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1A26;--surface:#162434;--ink:#E6EFF8;--muted:#9FB6CB;--line:#2A3F55;--accent:#7DB8F0;--on:#0B1B2B;--tint:#1D3249;}}
+:root[data-theme="dark"]{--bg:#0F1A26;--surface:#162434;--ink:#E6EFF8;--muted:#9FB6CB;--line:#2A3F55;--accent:#7DB8F0;--on:#0B1B2B;--tint:#1D3249;}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px;}
+.hero{background:linear-gradient(120deg,#E6F1FC 0%,#CFE3F7 55%,#B5D3F1 100%);color:#12263A;padding:calc(26px + env(safe-area-inset-top,0px)) 0 24px;border-bottom:4px solid #7FB2E5;}
+.hero h1{font-size:clamp(26px,4vw,36px);margin:0;letter-spacing:-.01em;}
+.hero p{margin:4px 0 14px;font-size:17px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{background:rgba(255,255,255,.7);border:1px solid #9CC3EA;color:#1F4E86;border-radius:999px;padding:4px 14px;font-weight:600;font-size:14px;}
+main{padding:20px 0 48px;}
+.notice{background:var(--tint);border-left:4px solid var(--accent);border-radius:6px;padding:10px 14px;font-size:14px;margin:0 0 18px;}
+[role=tablist]{display:flex;flex-wrap:wrap;gap:6px;border-bottom:2px solid var(--line);margin-bottom:20px;}
+[role=tab]{font:inherit;font-weight:600;background:none;color:var(--muted);border:0;border-bottom:4px solid transparent;margin-bottom:-2px;padding:10px 14px;cursor:pointer;}
+[role=tab][aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent);}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+.card{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--accent);border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(30,70,120,.08);}
+#p-daily .card{border-top-color:#8EC0EE;}#p-weekly .card{border-top-color:#4A90D9;}#p-monthly .card{border-top-color:#1F4E86;}
+h2{font-size:20px;margin:0 0 4px;}
+.sub{color:var(--muted);margin:0 0 12px;}
+.bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin:8px 0 14px;}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#9CC7EE,#2B6CB0);transition:width .3s;}
+ul.tasks{list-style:none;margin:0;padding:0;}
+ul.tasks li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);}
+ul.tasks li:first-child{border-top:0;}
+ul.tasks label{flex:1;display:flex;gap:10px;cursor:pointer;}
+ul.tasks input[type=checkbox]{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none;}
+ul.tasks input:checked+span{color:var(--muted);text-decoration:line-through;}
+.sopbtn{font:inherit;font-size:13px;font-weight:600;white-space:nowrap;background:none;color:var(--accent);border:1.5px solid var(--accent);border-radius:999px;padding:3px 13px;cursor:pointer;}
+.sopbtn.has{background:var(--accent);color:var(--on);}
+.x{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
+.row{display:flex;gap:8px;margin-top:14px;}
+label.f{display:block;font-weight:600;font-size:14px;margin:12px 0 4px;}
+input[type=text],input[type=email],select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;}
+textarea{min-height:84px;resize:vertical;}
+.btn{font:inherit;font-weight:600;background:var(--accent);color:var(--on);border:0;border-radius:6px;padding:9px 16px;cursor:pointer;}
+.btn.alt{background:none;color:var(--accent);border:1.5px solid var(--accent);}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+footer{color:var(--muted);font-size:13px;margin-top:28px;}
+dialog{width:min(1080px,96vw);max-height:92vh;border:0;border-radius:12px;padding:0;background:var(--bg);color:var(--ink);overflow:auto;}
+dialog::backdrop{background:rgba(10,25,45,.55);}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;background:linear-gradient(120deg,#E6F1FC,#BBD8F4);color:#12263A;position:sticky;top:0;z-index:2;}
+.dh h2{margin:0;font-size:19px;}.dh .k{font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.9;}
+.dh .btn{background:#2B6CB0;color:#fff;}
+.db{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px;}
+.step{border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:12px;background:var(--surface);}
+.step small{color:var(--accent);font-weight:700;}
+#prev{padding:22px;border:1px solid var(--line);border-radius:8px;align-self:start;}
+#msg,#e-msg{font-size:14px;color:var(--muted);min-height:1.4em;margin-top:10px;}
+.calh{display:flex;justify-content:space-between;align-items:center;gap:12px;}.calh h2{margin:0;}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px;}
+.dow{font-size:12px;font-weight:600;color:var(--muted);text-align:center;}
+.day{min-height:60px;border:1px solid var(--line);border-radius:8px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;font-size:13px;background:var(--surface);color:var(--muted);}
+.day.blank{border:0;background:none;}.day.today{outline:3px solid var(--accent);outline-offset:1px;}.day.future{opacity:.5;}
+.dn{font-weight:700;}.dp{font-size:12px;text-align:right;font-weight:600;}
+.legend{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-top:14px;flex-wrap:wrap;}
+.legend i{flex:0 0 150px;height:10px;border-radius:5px;background:linear-gradient(90deg,#E3EEF8,#1D4E89);}
+.drop{border:2px dashed var(--accent);background:var(--tint);border-radius:10px;padding:18px 14px;text-align:center;cursor:pointer;margin-top:14px;font-weight:600;}
+.drop small{display:block;font-weight:400;color:var(--muted);margin-top:4px;}
+.drop.over,.drop:hover{background:var(--line);}
+.thumb{display:block;max-width:100%;max-height:180px;border:1px solid var(--line);border-radius:6px;margin-top:8px;}
+.srow{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.btn.sm{padding:5px 10px;font-size:13px;}
+[hidden]{display:none!important;}
+@media (max-width:820px){.db{grid-template-columns:1fr;}}@media (max-width:520px){.day{min-height:48px;padding:4px;font-size:12px;}.cal{gap:4px;}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <h1>Investment Operations Dashboard</h1>
+  <p id="today"></p>
+  <div class="chips"><span class="chip" id="c-daily"></span><span class="chip" id="c-weekly"></span><span class="chip" id="c-monthly"></span></div>
+</div></header>
+<main class="wrap">
+  <p class="notice">Everything on this page stays in your browser and nothing is sent anywhere. Never enter client names, account numbers, SSNs, or other confidential data, including in SOP text and screenshots.</p>
+  <div role="tablist" aria-label="Sections">
+    <button role="tab" id="t-daily" aria-selected="true" aria-controls="p-daily">Daily</button>
+    <button role="tab" id="t-weekly" aria-selected="false" aria-controls="p-weekly">Weekly</button>
+    <button role="tab" id="t-monthly" aria-selected="false" aria-controls="p-monthly">Monthly</button>
+    <button role="tab" id="t-cal" aria-selected="false" aria-controls="p-cal">Calendar</button>
+    <button role="tab" id="t-exc" aria-selected="false" aria-controls="p-exc">Exceptions</button>
+  </div>
+  <section id="p-daily" role="tabpanel"></section>
+  <section id="p-weekly" role="tabpanel" hidden></section>
+  <section id="p-monthly" role="tabpanel" hidden></section>
+  <section id="p-cal" role="tabpanel" hidden>
+    <div class="card">
+      <div class="calh"><button class="btn alt" id="cal-prev" type="button" aria-label="Previous month">‹</button><h2 id="cal-title"></h2><button class="btn alt" id="cal-next" type="button" aria-label="Next month">›</button></div>
+      <p class="sub" id="cal-sum" style="margin-top:8px"></p>
+      <div class="cal" id="cal-grid"></div>
+      <div class="legend"><span>0%</span><i></i><span>100% of that day’s daily tasks complete. Darker blue means more done.</span></div>
+    </div>
+  </section>
+  <section id="p-exc" role="tabpanel" hidden>
+    <div class="card" style="max-width:640px">
+      <h2>Report an exception</h2>
+      <p class="sub">Builds an email draft in your own mail app. Use your firm email account so the message is kept the way firm policy requires.</p>
+      <label class="f" for="e-to">Investment Operations Manager’s email</label><input type="email" id="e-to" autocomplete="off">
+      <label class="f" for="e-cat">Category</label>
+      <select id="e-cat"><option>Structured note data mismatch</option><option>Website display discrepancy</option><option>New note missing from website</option><option>Trade exception</option><option>Compliance exception</option><option>Ticket escalation</option><option>Other</option></select>
+      <label class="f" for="e-pri">Priority</label>
+      <select id="e-pri"><option>Normal</option><option>High</option><option>Low</option></select>
+      <label class="f" for="e-ref">Internal reference (ticket or note ID, no client names)</label><input type="text" id="e-ref" maxlength="80">
+      <label class="f" for="e-desc">What happened</label><textarea id="e-desc" maxlength="1500"></textarea>
+      <label class="f" for="e-act">Action needed</label><textarea id="e-act" maxlength="800"></textarea>
+      <div class="btns"><button class="btn" id="e-open" type="button">Open email draft</button><button class="btn alt" id="e-copy" type="button">Copy text</button></div>
+      <div id="e-msg" aria-live="polite"></div>
+    </div>
+  </section>
+  <footer>No tracking, no external requests, no accounts. Data is saved only in this browser. Clear your site data to erase it.</footer>
+</main>
+
+<dialog id="dlg" aria-labelledby="dtitle">
+  <div class="dh"><div><div class="k" id="dkind"></div><h2 id="dtitle"></h2></div><button class="btn" id="dclose" type="button">Close</button></div>
+  <div class="db">
+    <div>
+      <p class="sub">Saves automatically for this task only. Blur or crop anything sensitive in screenshots, and never include client names or account numbers.</p>
+      <label class="f" for="f-title">SOP title</label><input type="text" id="f-title" maxlength="120">
+      <label class="f" for="f-purpose">Purpose</label><textarea id="f-purpose" maxlength="600"></textarea>
+      <label class="f" for="f-sys">Systems used</label><input type="text" id="f-sys" maxlength="160" placeholder="Example: ticketing system, data platform">
+      <label class="f" for="f-owner">Owner or role</label><input type="text" id="f-owner" maxlength="80">
+      <label class="f" for="f-ver">Version</label><input type="text" id="f-ver" maxlength="12">
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Add screenshots">Drop screenshots here, or click to choose<small>Or just paste (Ctrl+V / Cmd+V). Each photo becomes a new step, in order.</small></div>
+      <input type="file" id="multi" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+      <div id="steps"></div>
+      <div class="btns">
+        <button class="btn alt" id="add-step" type="button">Add step</button>
+        <button class="btn" id="dl" type="button">Download</button>
+        <button class="btn alt" id="pv" type="button">Print view</button>
+        <button class="btn alt" id="del" type="button">Delete SOP</button>
+      </div>
+      <div id="msg" aria-live="polite"></div>
+    </div>
+    <div class="doc" id="prev" aria-label="SOP preview"></div>
+  </div>
+</dialog>
+
+<script>
+var FIRM="Sample Operations Template",CONF="Sample Template \u2014 No Firm or Client Data";
+var PLATFORMS=["Reporting Platform 1","Reporting Platform 2","Reporting Platform 3","Reporting Platform 4","Reporting Platform 5","Reporting Platform 6","Reporting Platform 7","Reporting Platform 8","Reporting Platform 9"];
+var TASKS={
+  daily:["Verify structured notes for accuracy","Confirm newly purchased structured notes are added to the website","Verify the website shows correct structured note data","Triage trade and compliance exceptions and route them to the right team member","Check the ticketing system for outstanding tickets","Assign tickets to the correct individual","Escalate unresolved tickets","Report exceptions to the Investment Operations Manager","Note any steps worth documenting or automating"],
+  weekly:["Report structured note performance data to custodian","Verify structured note performance data across reporting software"].concat(["Audit the structured notes database for accuracy","Review outstanding tickets","Review valuation calculations and verify note terms","Review open exceptions and escalations","Update SOPs for any process changes"]),
+  monthly:PLATFORMS.map(function(p){return "Check "+p+" for accuracy and correctness";}).concat(["Audit the structured notes database","Review valuation calculations end to end","Summarize the month\u2019s exceptions for the Investment Operations Manager","Review SOPs and update anything out of date","Review the automation and tools backlog"])
+};
+var TYPES=["daily","weekly","monthly"],NAMES={daily:"Daily",weekly:"Weekly",monthly:"Monthly"};
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;}
+function pad(n){return String(n).padStart(2,"0");}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+function nl(s){return s.replace(/\n/g,"<br>");}
+function read(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function hash(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
+function sopId(t,task){return t+"-"+hash(task);}
+function has(id){try{return localStorage.getItem("opsdash:sop:"+id)!==null;}catch(e){return false;}}
+function monday(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7));}
+function keyFor(t){var d=new Date(),y=d.getFullYear(),m=pad(d.getMonth()+1);
+  if(t==="daily")return y+"-"+m+"-"+pad(d.getDate());
+  if(t==="monthly")return y+"-"+m;
+  var w=monday();return "wk-"+w.getFullYear()+"-"+pad(w.getMonth()+1)+"-"+pad(w.getDate());}
+function label(t){var d=new Date();
+  if(t==="daily")return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  if(t==="monthly")return d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+  return "Week of "+monday().toLocaleDateString("en-US",{month:"long",day:"numeric"});}
+
+// Shared document styles (used by the preview and by exported files)
+var DOCCSS=`.doc,.doc *{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box}
+.doc{font:15px/1.6 "Segoe UI",Arial,sans-serif;color:#12263A;background:#fff}
+.doc .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:4px solid #2B6CB0;padding-bottom:10px}
+.doc .firm{font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:#1F4E86}
+.doc .kind{font-size:12px;color:#5A6B7D}
+.doc .tag{font-size:11px;font-weight:700;color:#fff;background:#1F4E86;padding:5px 10px;border-radius:3px;letter-spacing:.05em;text-align:center}
+.doc h1{font-size:26px;margin:18px 0 8px;color:#12263A}
+.doc table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+.doc td{border:1px solid #CFE0F0;padding:6px 10px}
+.doc td:nth-child(odd){background:#E6F0FA;font-weight:600;width:16%}
+.doc h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:#1F4E86;border-bottom:1px solid #CFE0F0;padding-bottom:4px;margin:22px 0 8px}
+.doc .st{margin:14px 0;break-inside:avoid}
+.doc .st h3{font-size:16px;margin:0 0 4px;color:#12263A}
+.doc .n{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;background:#2B6CB0;color:#fff;font-size:13px;margin-right:8px}
+.doc img{max-width:100%;border:1px solid #CFE0F0;border-radius:4px;margin-top:8px}
+.doc .fig{font-size:12px;color:#5A6B7D}
+.doc .foot{margin-top:28px;border-top:1px solid #CFE0F0;padding-top:8px;font-size:11px;color:#5A6B7D;text-align:center;background:#fff}
+@media print{.doc .foot{position:fixed;bottom:0;left:0;right:0;margin:0}}`;
+var sty=document.createElement("style");sty.textContent=DOCCSS;document.head.appendChild(sty);
+
+function docHtml(s){
+  var h="<div class=\"top\"><div><div class=\"firm\">"+esc(FIRM)+"</div><div class=\"kind\">Standard Operating Procedure</div></div><div class=\"tag\">"+esc(CONF)+"</div></div>";
+  h+="<h1>"+esc(s.title||s.task)+"</h1>";
+  h+="<table><tr><td>Owner</td><td>"+esc(s.owner||"\u2014")+"</td><td>Frequency</td><td>"+esc(NAMES[s.type])+"</td></tr><tr><td>Version</td><td>"+esc(s.version||"\u2014")+"</td><td>Last updated</td><td>"+esc(s.date||new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}))+"</td></tr><tr><td>Systems</td><td colspan=\"3\">"+esc(s.systems||"\u2014")+"</td></tr></table>";
+  if(s.purpose)h+="<h2>Purpose</h2><p>"+nl(esc(s.purpose))+"</p>";
+  if(s.steps.length)h+="<h2>Procedure</h2>";
+  s.steps.forEach(function(p,i){
+    h+="<div class=\"st\"><h3><span class=\"n\">"+(i+1)+"</span>"+esc(p.head||"Step "+(i+1))+"</h3>";
+    if(p.text)h+="<p>"+nl(esc(p.text))+"</p>";
+    if(p.img&&p.img.indexOf("data:image/")===0)h+="<img alt=\"Screenshot for step "+(i+1)+"\" src=\""+p.img+"\"><div class=\"fig\">Figure "+(i+1)+"</div>";
+    h+="</div>";
+  });
+  return h+"<div class=\"foot\">"+esc(CONF)+" \u2022 "+esc(FIRM)+"</div>";
+}
+function docFile(s){
+  return "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; img-src data:\"><title>"+esc(s.title||s.task)+"</title><style>"+DOCCSS+"body{margin:0;padding:32px;background:#fff}@page{margin:16mm 14mm 18mm}@media print{body{padding:0}.noprint{display:none}}</style></head><body><div class=\"doc\">"+docHtml(s)+"</div><p class=\"noprint\" style=\"text-align:center;color:#5A6B7D;font:13px sans-serif\">To save as PDF, press Ctrl+P (Cmd+P on Mac) and choose Save as PDF.</p></body></html>";
+}
+
+// Task checklists
+function build(t){
+  var p=document.getElementById("p-"+t),c=el("div","card");
+  c.appendChild(el("h2","",NAMES[t]+" tasks"));
+  c.appendChild(el("p","sub",label(t)+". Checkmarks reset each period. Use SOP on any task to document it."));
+  var txt=el("div"),bar=el("div","bar"),fill=el("i");bar.appendChild(fill);
+  var ul=el("ul","tasks");ul.id="list-"+t;
+  var row=el("div","row"),inp=el("input");inp.type="text";inp.maxLength=140;inp.placeholder="Add your own task";inp.setAttribute("aria-label","Add a "+t+" task");
+  var add=el("button","btn alt","Add");add.type="button";
+  add.addEventListener("click",function(){var v=inp.value.trim();if(!v)return;var cu=read("opsdash:custom:"+t,[]);cu.push(v);write("opsdash:custom:"+t,cu);inp.value="";paint(t);});
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter")add.click();});
+  row.appendChild(inp);row.appendChild(add);
+  [txt,bar,ul,row].forEach(function(n){c.appendChild(n);});p.appendChild(c);p._txt=txt;p._fill=fill;
+}
+function paint(t){
+  var p=document.getElementById("p-"+t),ul=document.getElementById("list-"+t),dk="opsdash:"+t+":"+keyFor(t);
+  var done=read(dk,{}),custom=read("opsdash:custom:"+t,[]),all=TASKS[t].concat(custom),n=0;
+  ul.textContent="";
+  all.forEach(function(task,i){
+    var li=el("li"),lb=el("label"),cb=el("input");cb.type="checkbox";cb.checked=!!done[task];if(cb.checked)n++;
+    cb.addEventListener("change",function(){if(cb.checked)done[task]=1;else delete done[task];write(dk,done);paint(t);});
+    lb.appendChild(cb);lb.appendChild(el("span","",task));li.appendChild(lb);
+    var id=sopId(t,task),h=has(id),b=el("button","sopbtn"+(h?" has":""),h?"View SOP":"Add SOP");b.type="button";
+    b.setAttribute("aria-label",(h?"Open":"Create")+" SOP for: "+task);b.addEventListener("click",function(){openSop(t,task);});li.appendChild(b);
+    if(i>=TASKS[t].length){var x=el("button","x","\u00d7");x.type="button";x.setAttribute("aria-label","Remove task");
+      x.addEventListener("click",function(){custom.splice(i-TASKS[t].length,1);write("opsdash:custom:"+t,custom);paint(t);});li.appendChild(x);}
+    ul.appendChild(li);
+  });
+  p._txt.textContent=n+" of "+all.length+" complete";
+  p._fill.style.width=(all.length?Math.round(n/all.length*100):0)+"%";
+  document.getElementById("c-"+t).textContent=NAMES[t]+" "+n+"/"+all.length;
+  if(t==="daily")write("opsdash:day:"+keyFor("daily"),{n:n,total:all.length});
+}
+TYPES.forEach(function(t){build(t);paint(t);});
+document.getElementById("today").textContent=label("daily");
+
+var tabs=["daily","weekly","monthly","cal","exc"];
+tabs.forEach(function(id){document.getElementById("t-"+id).addEventListener("click",function(){
+  tabs.forEach(function(o){var on=o===id;document.getElementById("t-"+o).setAttribute("aria-selected",on);document.getElementById("p-"+o).hidden=!on;});if(id==="cal")renderCal();});});
+
+// Calendar
+var calM=new Date();calM.setDate(1);
+function shade(p){var a=[227,238,248],b=[29,78,137];return "rgb("+a.map(function(v,i){return Math.round(v+(b[i]-v)*p/100);}).join(",")+")";}
+function renderCal(){
+  var box=document.getElementById("cal-grid");box.textContent="";
+  var y=calM.getFullYear(),m=calM.getMonth(),first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),now=new Date(),sum=0,cnt=0,best=null;
+  document.getElementById("cal-title").textContent=calM.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(function(n){box.appendChild(el("div","dow",n));});
+  for(var i=0;i<first;i++)box.appendChild(el("div","day blank"));
+  for(var d=1;d<=days;d++){
+    var dt=new Date(y,m,d),rec=read("opsdash:day:"+y+"-"+pad(m+1)+"-"+pad(d),null),c=el("div","day"),ds=dt.toLocaleDateString("en-US",{month:"long",day:"numeric"});
+    c.appendChild(el("span","dn",String(d)));
+    if(rec&&rec.total){var p=Math.round(rec.n/rec.total*100);c.style.background=shade(p);c.style.color=p>=55?"#FFFFFF":"#12263A";c.style.borderColor="transparent";
+      c.appendChild(el("span","dp",p+"%"));c.setAttribute("aria-label",ds+": "+rec.n+" of "+rec.total+" daily tasks complete");
+      sum+=p;cnt++;if(!best||p>best.p)best={p:p,ds:ds};}
+    else c.setAttribute("aria-label",ds+": no data");
+    if(y===now.getFullYear()&&m===now.getMonth()&&d===now.getDate())c.classList.add("today");
+    else if(dt>now)c.classList.add("future");
+    box.appendChild(c);
+  }
+  document.getElementById("cal-sum").textContent=cnt?("Tracked days: "+cnt+". Average completion: "+Math.round(sum/cnt)+"%. Best day: "+best.ds+" ("+best.p+"%)."):"No tracked days this month yet. Days appear here as you open the dashboard and check off tasks.";
+}
+document.getElementById("cal-prev").addEventListener("click",function(){calM.setMonth(calM.getMonth()-1);renderCal();});
+document.getElementById("cal-next").addEventListener("click",function(){calM.setMonth(calM.getMonth()+1);renderCal();});
+
+// Per-task SOPs
+var dlg=document.getElementById("dlg"),cur=null,tmr=null,dirty=false,ALLOWED=["image/png","image/jpeg","image/webp","image/gif"];
+var F={title:"f-title",purpose:"f-purpose",systems:"f-sys",owner:"f-owner",version:"f-ver"};
+function msg(t){document.getElementById("msg").textContent=t;}
+function prev(){document.getElementById("prev").innerHTML=docHtml(cur);}
+function save(){if(!cur)return;cur.date=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+  try{localStorage.setItem("opsdash:sop:"+cur.id,JSON.stringify(cur));dirty=false;msg("Saved on this device.");}catch(e){msg("Storage is full. Remove or shrink some images.");}}
+function later(){dirty=true;clearTimeout(tmr);tmr=setTimeout(save,400);}
+function openSop(t,task){
+  var id=sopId(t,task);
+  cur=read("opsdash:sop:"+id,null)||{id:id,type:t,task:task,title:task,purpose:"",systems:"",owner:"Investment Operations",version:"1.0",steps:[],date:""};
+  Object.keys(F).forEach(function(k){document.getElementById(F[k]).value=cur[k]||"";});
+  document.getElementById("dtitle").textContent=task;document.getElementById("dkind").textContent=NAMES[t]+" task SOP";
+  dirty=false;stepsUI();prev();msg("");dlg.showModal();
+}
+Object.keys(F).forEach(function(k){document.getElementById(F[k]).addEventListener("input",function(e){cur[k]=e.target.value;prev();later();});});
+var lastStep=null;
+function loadImage(file,cb){
+  if(ALLOWED.indexOf(file.type)<0||file.size>10e6){msg("Use a PNG, JPG, WebP, or GIF under 10 MB.");cb(null);return;}
+  var r=new FileReader();
+  r.onerror=function(){msg("That image couldn\u2019t be read.");cb(null);};
+  r.onload=function(){var im=new Image();
+    im.onload=function(){var sc=Math.min(1,1000/im.width),cv=document.createElement("canvas"),cx;
+      cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);cx=cv.getContext("2d");
+      cx.fillStyle="#fff";cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(im,0,0,cv.width,cv.height);
+      cb(cv.toDataURL("image/jpeg",0.72));};
+    im.onerror=function(){msg("That image couldn\u2019t be read.");cb(null);};im.src=r.result;};
+  r.readAsDataURL(file);
+}
+function addPhotos(files,target){
+  var list=Array.prototype.slice.call(files),added=0,first=-1;
+  (function next(){
+    var f=list.shift();
+    if(!f){stepsUI();prev();save();
+      if(added){msg("Added "+added+" photo"+(added>1?"s":"")+". Now give each step a headline and instructions.");
+        if(first>=0){var inp=document.querySelectorAll("#steps .step")[first];if(inp){var h=inp.querySelector("input[type=text]");if(h)h.focus();}}}
+      return;}
+    loadImage(f,function(d){
+      if(d){added++;
+        if(target>=0&&cur.steps[target]&&!cur.steps[target].img){cur.steps[target].img=d;if(first<0)first=target;target=-1;}
+        else{cur.steps.push({head:"",text:"",img:d});if(first<0)first=cur.steps.length-1;}}
+      next();});
+  })();
+}
+function stepsUI(){
+  var box=document.getElementById("steps");box.textContent="";
+  cur.steps.forEach(function(s,i){
+    var d=el("div","step");d.appendChild(el("small","","STEP "+(i+1)));
+    d.addEventListener("focusin",function(){lastStep=i;});
+    var h=el("input");h.type="text";h.maxLength=120;h.placeholder="Headline (example: Open the report)";h.value=s.head;h.setAttribute("aria-label","Step "+(i+1)+" headline");
+    h.addEventListener("input",function(){s.head=h.value;prev();later();});
+    var t=el("textarea");t.maxLength=1500;t.placeholder="Instructions";t.value=s.text;t.setAttribute("aria-label","Step "+(i+1)+" instructions");
+    t.addEventListener("input",function(){s.text=t.value;prev();later();});
+    d.appendChild(h);d.appendChild(t);
+    if(s.img&&s.img.indexOf("data:image/")===0){var th=el("img","thumb");th.src=s.img;th.alt="Screenshot for step "+(i+1);d.appendChild(th);}
+    var f=el("input");f.type="file";f.hidden=true;f.accept="image/png,image/jpeg,image/webp,image/gif";f.setAttribute("aria-label","Step "+(i+1)+" screenshot");
+    f.addEventListener("change",function(){var file=f.files[0];f.value="";if(!file)return;
+      loadImage(file,function(x){if(x){s.img=x;stepsUI();prev();save();}});});
+    var row=el("div","srow");
+    function btn(txt,fn,dis){var b=el("button","btn alt sm",txt);b.type="button";if(dis)b.disabled=true;b.addEventListener("click",fn);row.appendChild(b);return b;}
+    btn(s.img?"Replace photo":"Add photo",function(){f.click();});
+    if(s.img)btn("Remove photo",function(){s.img="";stepsUI();prev();save();});
+    btn("\u2191 Up",function(){var x=cur.steps[i];cur.steps[i]=cur.steps[i-1];cur.steps[i-1]=x;stepsUI();prev();later();},i===0);
+    btn("\u2193 Down",function(){var x=cur.steps[i];cur.steps[i]=cur.steps[i+1];cur.steps[i+1]=x;stepsUI();prev();later();},i===cur.steps.length-1);
+    btn("Remove step",function(){cur.steps.splice(i,1);stepsUI();prev();later();});
+    d.appendChild(f);d.appendChild(row);box.appendChild(d);
+  });
+}
+// Easy photo input: drop, paste, or click
+var dropEl=document.getElementById("drop"),multi=document.getElementById("multi");
+dropEl.addEventListener("click",function(){multi.click();});
+dropEl.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();multi.click();}});
+multi.addEventListener("change",function(){if(cur&&multi.files.length)addPhotos(multi.files,-1);multi.value="";});
+dlg.addEventListener("dragover",function(e){if(e.dataTransfer&&Array.prototype.indexOf.call(e.dataTransfer.types,"Files")>=0){e.preventDefault();dropEl.classList.add("over");}});
+dlg.addEventListener("dragleave",function(e){if(e.target===dropEl||e.target===dlg)dropEl.classList.remove("over");});
+dlg.addEventListener("drop",function(e){dropEl.classList.remove("over");if(!cur||!e.dataTransfer||!e.dataTransfer.files.length)return;e.preventDefault();addPhotos(e.dataTransfer.files,-1);});
+dlg.addEventListener("paste",function(e){
+  var items=(e.clipboardData&&e.clipboardData.items)||[],files=[];
+  for(var i=0;i<items.length;i++)if(items[i].kind==="file"&&items[i].type.indexOf("image/")===0)files.push(items[i].getAsFile());
+  if(!files.length||!cur)return;e.preventDefault();
+  addPhotos(files,lastStep!==null&&lastStep<cur.steps.length?lastStep:-1);});
+dlg.addEventListener("close",function(){lastStep=null;});
+document.getElementById("add-step").addEventListener("click",function(){cur.steps.push({head:"",text:"",img:""});stepsUI();prev();later();});
+document.getElementById("dclose").addEventListener("click",function(){dlg.close();});
+dlg.addEventListener("close",function(){if(cur&&dirty)save();cur=null;TYPES.forEach(paint);});
+function blobUrl(){return URL.createObjectURL(new Blob([docFile(cur)],{type:"text/html"}));}
+document.getElementById("dl").addEventListener("click",function(){
+  var name=(cur.title||cur.task).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60)||"sop";
+  var a=document.createElement("a");a.href=blobUrl();a.download=name+"-sop.html";document.body.appendChild(a);a.click();a.remove();msg("Downloaded "+name+"-sop.html");});
+document.getElementById("pv").addEventListener("click",function(){
+  var w=window.open(blobUrl(),"_blank");if(!w)msg("Allow pop-ups to open the print view, or use Download.");});
+document.getElementById("del").addEventListener("click",function(){
+  if(!confirm("Delete this SOP? This can\u2019t be undone."))return;
+  try{localStorage.removeItem("opsdash:sop:"+cur.id);}catch(e){}cur=null;dlg.close();});
+
+// Exceptions
+var toEl=document.getElementById("e-to");toEl.value=read("opsdash:mgr","");
+function excText(){var v=function(i){return document.getElementById(i).value.trim();};
+  return {subject:"["+v("e-pri")+"] Exception: "+v("e-cat")+(v("e-ref")?" ("+v("e-ref")+")":""),
+    body:"Category: "+v("e-cat")+"\nPriority: "+v("e-pri")+"\nReference: "+(v("e-ref")||"n/a")+"\n\nWhat happened:\n"+v("e-desc")+"\n\nAction needed:\n"+v("e-act")+"\n\nReported "+new Date().toLocaleString("en-US")};}
+function emsg(t){document.getElementById("e-msg").textContent=t;}
+document.getElementById("e-open").addEventListener("click",function(){
+  var to=toEl.value.trim();if(!/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(to)){emsg("Enter a valid email address first.");return;}
+  write("opsdash:mgr",to);var m=excText();
+  window.location.href="mailto:"+to+"?subject="+encodeURIComponent(m.subject)+"&body="+encodeURIComponent(m.body);emsg("Opening your mail app. Review the draft before sending.");});
+document.getElementById("e-copy").addEventListener("click",function(){var m=excText(),t="Subject: "+m.subject+"\n\n"+m.body;
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){emsg("Copied.");},function(){emsg("Copy failed. Select the text manually.");});}else{emsg("Copy isn\u2019t available in this browser.");}});
+</script>
+</body>
+</html>
